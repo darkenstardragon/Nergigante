@@ -124,6 +124,7 @@ async def on_reaction_add(reaction, user):
     if reaction.emoji == '\U0001F5D1' and user != client.user and user in authorized_user:
         await client.send_message(discord.Object(id=BOT_CHANNEL_ID), "ลบโพสต์เรียบร้อย! " + user.mention)
         await client.delete_message(reaction.message)
+        await client.send_message(reaction.message.channel, reaction.message.timestamp)
         reaction.message.embeds
         authorized_user.remove(user)
     if reaction.emoji == '\U0001F501' and user != client.user:
