@@ -16,6 +16,8 @@ authorized_user = set()
 client = Bot(command_prefix=BOT_PREFIX, pm_help=True)
 client.remove_command('help')
 
+
+
 @client.command(pass_context = True)
 async def help(ctx):
     commands = dict()

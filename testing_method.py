@@ -9,7 +9,7 @@ from discord.ext.commands import Bot
 BOT_PREFIX = ("?", "!")
 client = Bot(command_prefix=BOT_PREFIX)
 
-'''
+
 async def list_servers():
     await client.wait_until_ready()
     while not client.is_closed:
@@ -105,4 +105,3 @@ async def on_message(message):
             ["R-Rawr... so lewd u////u".format(message)] * 5 + \
             ["Y-Yes please... I want your dick in my maw o//w//o".format(message)]
             await client.send_message(message.channel, random.choice(lewd_responses))
-'''
