@@ -106,7 +106,7 @@ async def help(ctx):
 
 @client.command(pass_context = True)
 async def newbutton(ctx):
-    msg = await client.send_message(ctx.message.channel, "กด React ที่รูป \U0001F195 ด้านล่าง เพื่อโพสต์")
+    msg = await client.send_message(discord.Object(id=LFG_CHANNEL_ID), "กด React ที่รูป \U0001F195 ด้านล่าง เพื่อเริ่มสร้างโพสต์")
     await client.add_reaction(msg, "\U0001F195")
 
 @client.command(pass_context = True)
