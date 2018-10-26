@@ -55,7 +55,7 @@ def time_to_expire(time):
     hour = int(strhour)
     minute = int(strminute)
     minute += timeAmount
-    while minute > 60:
+    while minute >= 60:
         hour += 1
         minute -= 60
     if minute < 10: strminute = "0" + str(minute)
@@ -128,17 +128,11 @@ async def cr(ctx, *args):
             return
         userID = ctx.message.server.get_member(ctx.message.author.id)
         embed = embedCreate(str(ctx.message.author.mention), getUrl(userID), sessionID, description, voice_channel, str(ctx.message.timestamp))
-        await client.send_message(discord.Object(id=LFG_CHANNEL_ID), embed=embed)
+        msg = await client.send_message(discord.Object(id=LFG_CHANNEL_ID), embed=embed)
         posted_user.add(ctx.message.author)
-        messages = []
-        async for msg in client.logs_from(discord.Object(id=LFG_CHANNEL_ID), limit=50):
-            messages.append(msg)
-            break
-        for msg in messages:
-            # await client.add_reaction(msg, emoji="🔁")
-            messagePack = MessagePack(ctx.message, ctx.message.timestamp, msg, ctx.message.author)
-            ls_messagePack.append(messagePack)
-            await client.add_reaction(msg, emoji='\U0001F5D1')
+        messagePack = MessagePack(ctx.message, ctx.message.timestamp, msg, ctx.message.author)
+        ls_messagePack.append(messagePack)
+        await client.add_reaction(msg, emoji='\U0001F5D1')
 
     else:
         await client.send_message(ctx.message.channel, "รูปแบบคำสั่งที่ถูกต้อง จะต้องเป็น `n!cr [Session ID] [Voice channel] คำอธิบาย...` เท่านั้นนะ!")
@@ -165,21 +159,44 @@ async def on_reaction_add(reaction, user):
             await client.remove_reaction(reaction.message, '\U0001F5D1', user)
 
     if reaction.emoji == '\U0001F195' and user != client.user:
+        await client.remove_reaction(reaction.message, '\U0001F195', user)
+        if reaction.message.author in posted_user:
+            await client.send_message(reaction.message.channel, "เจ้ามีโพสต์ LFG อยู่ที่ <#" + LFG_CHANNEL_ID + "> อยู่แล้วนะ!")
+            return
         ls_message_input = []
         ls_message_output = [
             "\nสวัสดี! ข้าเห็นว่าเจ้าต้องการจะโพสต์หาปาร์ตี้สินะ ก่อนอื่นก็บอก **Session ID** ของเจ้ามาก่อนสิ!\nแต่ถ้าหากถ้าเจ้าต้องการจะยกเลิก ก็สามารถพิมพ์ `stop` ได้ทุกเมื่อนะ!",
-            "\nแล้ว **Voice Channel** ล่ะ เจ้าจะใช้มันหรือไม่ ถ้าใช้ก็**พิมพ์ชื่อห้อง**มาเลย อย่าลืมว่าต้องพิมพ์แบบ*ไม่มีเว้นวรรค*นะ!\nแต่ถ้าหากเจ้าจะ**ไม่ใช้ Voice Channel** ก็พิมพ์ `-` มาเฉยๆเลยก็ได้!",
+            "\nแล้ว **Voice Channel** ล่ะ เจ้าจะใช้มันหรือไม่ ถ้าใช้ก็**พิมพ์ชื่อห้อง**มาเลย อย่าลืมว่าต้องพิมพ์แบบ**ไม่มีเว้นวรรค**นะ!\nแต่ถ้าหากเจ้าจะ**ไม่ใช้ Voice Channel** ก็พิมพ์ `-` มาเฉยๆเลยก็ได้!",
             "\nสุดท้ายแล้ว **อธิบาย**มาหน่อยสิว่า ปาร์ตี้ของเจ้าต้องการที่จะทำอะไร จะล่าตัวอะไร หรือต้องการความช่วยเหลืออะไร บอกมาให้หมดทีเดียวได้เลย!"
         ]
-        for i in range(3):
-            await client.send_message(discord.Object(id=BOT_CHANNEL_ID), user.mention + ls_message_output[i])
+        for i in range(1,4):
+            await client.send_message(discord.Object(id=BOT_CHANNEL_ID), user.mention + ls_message_output[i-1])
             msg = await client.wait_for_message(author=user, timeout=60)
+            if msg == None:
+                await client.send_message(discord.Object(id=BOT_CHANNEL_ID), "หมดเวลา... ข้ารอเจ้ามานานเกินไปละ ถ้าเจ้าอยากจะสร้างโพสต์ ค่อยเรียกข้าด้วยการกดปุ่ม \U0001F195 ที่ <#%s> อีกทีละกัน!" % LFG_CHANNEL_ID)
+                return
             ls_message_input.append(msg.content)
-            if ls_message_input[i] == 'stop':
+            if ls_message_input[i-1] == 'stop':
                 await client.send_message(discord.Object(id=BOT_CHANNEL_ID), "ยกเลิกการสร้างโพสต์เรียบร้อย!")
                 return
-        await client.send_message(reaction.message.channel, ls_message_input[0] + ls_message_input[1] + ls_message_input[2])
-        # TODO add LFG post
+            while i == 1 and len(msg.content) != 11:
+                ls_message_input = []
+                await client.send_message(discord.Object(id=BOT_CHANNEL_ID), "`%s` ไม่น่าจะเป็น Session ID ที่ถูกต้องนะ.. ลองตรวจสอบแล้วบอกข้ามาใหม่อีกทีสิ!" % msg.content)
+                msg = await client.wait_for_message(author=user, timeout=60)
+                if msg == None:
+                    await client.send_message(discord.Object(id=BOT_CHANNEL_ID), "Timeout... ข้ารอเจ้ามานานเกินไปละ ถ้าเจ้าอยากจะสร้างโพสต์ ค่อยเรียกข้าด้วยการกดปุ่ม \U0001F195 ที่ <#%s> อีกทีละกัน!" % LFG_CHANNEL_ID)
+                    return
+                ls_message_input.append(msg.content)
+
+        (sessionID, voice_channel, description) = ls_message_input
+        userID = reaction.message.server.get_member(user.id)
+        embed = embedCreate(str(user.mention), getUrl(userID), sessionID, description, voice_channel,
+                            str(reaction.message.timestamp))
+        msg = await client.send_message(discord.Object(id=LFG_CHANNEL_ID), embed=embed)
+        posted_user.add(user)
+        messagePack = MessagePack(reaction.message, reaction.message.timestamp, msg, user)
+        ls_messagePack.append(messagePack)
+        await client.add_reaction(msg, emoji='\U0001F5D1')
 
 @client.command(pass_context = True)
 async def setchannel(ctx, *args):
