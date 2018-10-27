@@ -1,8 +1,12 @@
 import random
 import discord
 import asyncio
+import json
+import os
 from discord import Game
 from discord.ext.commands import Bot
+
+os.chdir(r'C:\Users\user\Desktop\Python 3.6\Nergigante\data')
 
 BOT_PREFIX = "n!"
 TOKEN = "NTAwOTYwMjc3NjY0MzY2NjAy.DqSjwg.KHvktaWimh2TK06MWcHyQq2hLy0"
@@ -90,6 +94,27 @@ async def task():
 async def on_ready():
     await client.change_presence(game = Game(name = "with Darken"))
     print("Logged in as " + client.user.name)
+
+@client.command(pass_context = True)
+async def tag(ctx, *args):
+    with open('tagged_data.json','r') as f:
+        data = json.load(f)
+    if len(args) < 2:
+        await client.send_message(ctx.message.channel, "รูปแบบคำสั่งจะต้องเป็น `n!tag [Tag name] ข้อความ...` เท่านั้นนะ!")
+        return
+    tag_name = args[0]
+    msg = " ".join([e for e in args[1:]])
+    await update_data(data, tag_name, msg, ctx.message.channel)
+
+    with open('tagged_data.json','w') as f:
+        json.dump(data,f)
+
+async def update_data(data, tag_name, msg, channel):
+    if tag_name in data:
+        await client.send_message(channel, "แท็ก `%s` อยู่ในการใช้งานอยู่แล้วนะ!" % tag_name)
+        return
+    data[tag_name] = msg
+    await client.send_message(channel, "แท็ก `%s` สำเร็จเรียบร้อย! ข้อความ:\n%s" % (tag_name, msg))
 
 @client.command(pass_context = True)
 async def help(ctx):
@@ -203,7 +228,7 @@ async def setchannel(ctx, *args):
     global LFG_CHANNEL_ID
     global BOT_CHANNEL_ID
     if len(args) < 2:
-        await client.send_message(ctx.message.channel, "รูปแบบคำสั่งจะต้องเป็น `?setchannel [LFG or BOT] [Channel ID]` เท่านั้นนะ!")
+        await client.send_message(ctx.message.channel, "รูปแบบคำสั่งจะต้องเป็น `n!setchannel [LFG or BOT] [Channel ID]` เท่านั้นนะ!")
         return
     (type, id) = args
     if type.lower() == "lfg":
@@ -215,7 +240,7 @@ async def setchannel(ctx, *args):
         BOT_CHANNEL_ID = id;
         await client.send_message(ctx.message.channel, "นับจากนี้ไป ข้าจะถือว่า <#%s> เป็น Channel ของข้าละนะ!" % BOT_CHANNEL_ID)
     else:
-        await client.send_message(ctx.message.channel, "รูปแบบคำสั่งจะต้องเป็น `?setchannel [LFG or BOT] [Channel ID]` เท่านั้นนะ!")
+        await client.send_message(ctx.message.channel, "รูปแบบคำสั่งจะต้องเป็น `n!setchannel [LFG or BOT] [Channel ID]` เท่านั้นนะ!")
 
 @client.command(pass_context = True)
 async def getchannel(ctx):
