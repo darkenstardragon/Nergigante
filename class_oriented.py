@@ -95,7 +95,10 @@ async def on_ready():
     await client.change_presence(game = Game(name = "with Darken"))
     print("Logged in as " + client.user.name)
 
-@client.command(pass_context = True)
+@client.command(
+    pass_context = True,
+    aliases = 't'
+)
 async def tag(ctx, *args):
     with open('tagged_data.json','r') as f:
         data = json.load(f)
@@ -104,24 +107,55 @@ async def tag(ctx, *args):
         return
     tag_name = args[0]
     msg = " ".join([e for e in args[1:]])
-    await update_data(data, tag_name, msg, ctx.message.channel)
+    await update_data(data, tag_name, msg, ctx.message.channel, ctx.message.author)
 
     with open('tagged_data.json','w') as f:
         json.dump(data,f)
 
-async def update_data(data, tag_name, msg, channel):
-    if tag_name in data:
-        await client.send_message(channel, "แท็ก `%s` อยู่ในการใช้งานอยู่แล้วนะ!" % tag_name)
+@client.command(pass_context = True)
+async def delete(ctx, *args):
+    with open('tagged_data.json','r') as f:
+        data = json.load(f)
+    if len(args) < 1:
+        await client.send_message(ctx.message.channel, "รูปแบบคำสั่งจะต้องเป็น `n!remove [Tag name]` เท่านั้นนะ!")
         return
-    data[tag_name] = msg
-    await client.send_message(channel, "แท็ก `%s` สำเร็จเรียบร้อย! ข้อความ:\n%s" % (tag_name, msg))
+    tag_name = args[0]
+    await remove_data(data, tag_name, ctx.message.channel, ctx.message.author)
+
+    with open('tagged_data.json','w') as f:
+        json.dump(data,f)
+
+async def remove_data(data, tag_name, channel, user):
+    if not user.id in data:
+        await client.send_message(channel, "เจ้ายังไม่เคย Tag ซักรอบเลยนะ! มันไม่มีอะไรให้ข้าลบเลยน่ะสิ..." % tag_name)
+        return
+    if tag_name not in data[user.id]:
+        await client.send_message(channel, "เจ้าไม่เคย Tag คำว่า `%s` ให้กับข้ามาก่อนนะ ลองตรวจสอบใหม่ดู!" % tag_name)
+        return
+    await client.send_message(channel, "Tag `%s` ถูกลบเรียบร้อย!" % tag_name)
+    del data[user.id][tag_name]
+
+
+async def update_data(data, tag_name, msg, channel, user):
+    if not user.id in data:
+        data[user.id] = {}
+        data[user.id][tag_name] = msg
+        await client.send_message(channel, "Tag `%s` สำเร็จเรียบร้อย!:\n%s" % (tag_name, msg))
+        return
+    if tag_name in data[user.id]:
+        await client.send_message(channel, "Tag `%s`:\n%s" % (tag_name, data[user.id][tag_name]))
+        return
+    data[user.id][tag_name] = msg
+    await client.send_message(channel, "Tag `%s` สำเร็จเรียบร้อย!:\n%s" % (tag_name, msg))
 
 @client.command(pass_context = True)
 async def help(ctx):
+    global LFG_CHANNEL_ID
     commands = dict()
-    commands['`n!cr [Session ID] [Voice channel] คำอธิบาย...`'] = 'สร้างโพสต์หาเพื่อนเล่น (เวลาพิมพ์คำสั่งจริงๆไม่ต้องมี [] นะ)'
+    commands['`n!cr [Session ID] [Voice channel] คำอธิบาย...`'] = 'สร้างโพสต์หาเพื่อนเล่น (เวลาพิมพ์คำสั่งจริงๆไม่ต้องมี [] นะ) หรือจะไปกดปุ่ม \U0001F195 ในห้อง <#%s> ก็ได้' % LFG_CHANNEL_ID
     commands['`n!setchannel [lfg หรือ bot] [Channel ID]`'] = 'Set Channel ไว้ให้บอทประกาศใส่'
-    commands['`n!getchannel'] = 'สั่งบอทให้รายงาน LFG/BOT Channel ในปัจจุบัน ว่าบอทกำลังใช้ Channel ไหนอยู่'
+    commands['`n!getchannel`'] = 'สั่งบอทให้รายงาน LFG/BOT Channel ในปัจจุบัน ว่าบอทกำลังใช้ Channel ไหนอยู่'
+    commands['`n!tag` or `n!t`']
     msg = discord.Embed(title='Nergigante',
                         description="Written by darkenstardragon#2672",
                         color=0x0000ff)
