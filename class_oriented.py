@@ -155,7 +155,7 @@ async def help(ctx):
     commands['`n!cr [Session ID] [Voice channel] คำอธิบาย...`'] = 'สร้างโพสต์หาเพื่อนเล่น (เวลาพิมพ์คำสั่งจริงๆไม่ต้องมี [] นะ) หรือจะไปกดปุ่ม \U0001F195 ในห้อง <#%s> ก็ได้' % LFG_CHANNEL_ID
     commands['`n!setchannel [lfg หรือ bot] [Channel ID]`'] = 'Set Channel ไว้ให้บอทประกาศใส่'
     commands['`n!getchannel`'] = 'สั่งบอทให้รายงาน LFG/BOT Channel ในปัจจุบัน ว่าบอทกำลังใช้ Channel ไหนอยู่'
-    commands['`n!tag` or `n!t`']
+    commands['`n!tag [Tag name] Messages...`'] = 'เก็บข้อความไว้ใน Tag เพื่อที่จะเรียกใช้ให้บอทพิมพ์ข้อความเดิมกลับมาเมื่อเรียกคำสั่งเดิม'
     msg = discord.Embed(title='Nergigante',
                         description="Written by darkenstardragon#2672",
                         color=0x0000ff)
@@ -202,6 +202,7 @@ async def cr(ctx, *args):
 async def on_reaction_add(reaction, user):
     global ls_messagePack
     global posted_user
+    global new_button_messsage
     authorized = False
     for e in ls_messagePack:
         if e.owner == user and e.commandMessage.author == user:
