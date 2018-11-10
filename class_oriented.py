@@ -95,6 +95,45 @@ async def on_ready():
     await client.change_presence(game = Game(name = "with Darken"))
     print("Logged in as " + client.user.name)
 
+@client.event
+async def on_voice_state_update(before, after):
+    roles = ['a']*20
+    for role in after.server.roles:
+        if role.name == 'KT squad 1':
+            roles[1] = role
+        elif role.name == 'KT squad 2':
+            roles[2] = role
+        elif role.name == 'KT squad 3':
+            roles[3] = role
+        elif role.name == 'KT squad 4':
+            roles[4] = role
+        elif role.name == 'KT squad 5':
+            roles[5] = role
+        elif role.name == 'KT squad 6':
+            roles[6] = role
+
+    for role in after.roles:
+        if role in roles:
+            await client.remove_roles(before, role)
+
+    if before.voice.voice_channel is None or after.voice.voice_channel is not None:
+        voice_channel = after.voice.voice_channel
+        for i in range(1,7):
+            if voice_channel.name == 'KT squad ' + str(i):
+                await client.add_roles(after, roles[i])
+
+
+'''
+    if before.voice.voice_channel is not None or after.voice.voice_channel is None:
+        voice_channel = before.voice.voice_channel
+        print("I'm in")
+        for i in range(1,7):
+            if voice_channel.name == 'KT squad ' + str(i):
+                await client.remove_roles(after, roles[i])
+                print("removing..." + str(i))
+                return
+'''
+
 @client.command(
     pass_context = True,
     aliases = 't'
