@@ -1,1 +1,1 @@
-worker: python real_field.py
+worker: python3 real_field.py
