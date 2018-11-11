@@ -3,6 +3,7 @@ import discord
 import asyncio
 import json
 import os
+import discord
 from discord import Game
 from discord.ext.commands import Bot
 

@@ -1,0 +1,9 @@
+git+git://github.com/Rapptz/discord.py.git@async#egg=discord
+discord.py==0.14.3
+aiohttp
+websockets
+chardet
+random
+asyncio
+json
+os
