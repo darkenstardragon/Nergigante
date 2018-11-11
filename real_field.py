@@ -20,9 +20,17 @@ client.remove_command('help')
 ls_messagePack = []
 posted_user = set()
 
+BOT_CHANNEL_ID = "500622908641509386"
+LFG_CHANNEL_ID = "500622908641509386"
 
-BOT_CHANNEL_ID = "503919801169870849"
-LFG_CHANNEL_ID = "501020750115766282"
+channel_name = [
+    ["Kulve-Taroth Squad 1", "Squad 1/1", "Squad 1/2", "Squad 1/3", "Squad 1/4"],
+    ["Kulve-Taroth Squad B2", "Squad B2/1", "Squad B2/2", "Squad B2/3", "Squad B2/4"],
+    ["Kulve-Taroth Squad 3", "Squad 3/1", "Squad 3/2", "Squad 3/3", "Squad 3/4"],
+    ["Kulve-Taroth Squad 4", "Squad 4/1", "Squad 4/2", "Squad 4/3", "Squad 4/4"],
+    ["Kulve-Taroth Squad 5", "Squad 5/1", "Squad 5/2", "Squad 5/3", "Squad 5/4"],
+    ["Kulve-Taroth Squad 6", "Squad 6/1", "Squad 6/2", "Squad 6/3", "Squad 6/4"],
+]
 
 class MessagePack:
     def __init__(self, message, timestamp, embed, owner):
@@ -126,10 +134,11 @@ async def on_voice_state_update(before, after):
             i += 1
             await client.remove_roles(after, role)
     print("removed " + str(i) + " roles")
+    global channel_name
     if before.voice.voice_channel is None or after.voice.voice_channel is not None:
         voice_channel = after.voice.voice_channel
         for i in range(1,7):
-            if voice_channel.name == 'KT squad ' + str(i):
+            if voice_channel.name in channel_name[i-1]:
                 await client.add_roles(after, roles[i])
 
 @client.command(
