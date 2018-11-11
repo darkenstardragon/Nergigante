@@ -1,12 +1,7 @@
 import random
-import discord
 import asyncio
-import json
-import os
 from discord import Game
 from discord.ext.commands import Bot
-
-os.chdir(r'C:\Users\user\Desktop\Python 3.6\Nergigante\data')
 
 BOT_PREFIX = "n!"
 TOKEN = "NTAwOTYwMjc3NjY0MzY2NjAy.DqSjwg.KHvktaWimh2TK06MWcHyQq2hLy0"
@@ -141,6 +136,7 @@ async def on_voice_state_update(before, after):
             if voice_channel.name in channel_name[i-1]:
                 await client.add_roles(after, roles[i])
 
+'''
 @client.command(
     pass_context = True,
     aliases = 't'
@@ -193,6 +189,7 @@ async def update_data(data, tag_name, msg, channel, user):
         return
     data[user.id][tag_name] = msg
     await client.send_message(channel, "Tag `%s` สำเร็จเรียบร้อย!:\n%s" % (tag_name, msg))
+'''
 
 @client.command(pass_context = True)
 async def help(ctx):
